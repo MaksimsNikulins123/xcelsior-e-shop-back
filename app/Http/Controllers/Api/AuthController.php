@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SignupRequest;
 use App\Http\Requests\LoginRequest;
-use App\Models\Users;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
+use App\Exceptions\InvalidPasswordException;
 
 class AuthController extends Controller
 {
@@ -26,7 +29,7 @@ class AuthController extends Controller
     {
         
         $data = $request->validated();
-        $user = new Users;
+        $user = new User;
         $admins_array = [
             'arturs@xcelsior.lv',
             'zane@xcelsior.lv',
@@ -45,8 +48,9 @@ class AuthController extends Controller
                 'rights' => 'admin',
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => bcrypt($data['password']),
-                'user_location' => $data['user_location']
+                'password' => Crypt::encryptString($data['password']),
+                'user_location' => $data['user_location'],
+                'remember_me' => false
                 ]);
                 $this->response = [
                     'status' => 200,
@@ -59,8 +63,9 @@ class AuthController extends Controller
                 'rights' => 'manager',
                 'name' => $data['name'],
                 'email' => $data['email'],
-                'password' => bcrypt($data['password']),
-                'user_location' => $data['user_location']
+                'password' => Crypt::encryptString($data['password']),
+                'user_location' => $data['user_location'],
+                'remember_me' => false
             ]);
             $this->response = [
                 'status' => 200,
@@ -69,7 +74,7 @@ class AuthController extends Controller
         }else{
             $this->response = [
                 'status' => 200,
-                'message' => 'Signup error',
+                'message' => 'The selected email is invalid.',
             ];
         }
 
@@ -78,30 +83,26 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
+        $response = [];
+        $data = $request->validated();
 
-        $credentials = $request->validated();
-       
-        // if(!Auth::attempt($credentials)){
-        //     return response()->json([
-        //         'status' => 401,
-        //         'message' => 'Unauthorized'
-        // ]);
-        // }
+        $user = new User;
+        $login_user_id = $user->select('id')->where('email', $request->email)->first();
+        $signedup_user_info = $user->find($login_user_id)->first();
+        // $token = get_user_by_id
 
-        // $user = Auth::user();
-        // $token = $user->createToken('main')->plainTextToken;
-        // return response()->json([
-        //     'status' => 200,
-        //     'message' => 'Login validation seccess',
-        //     'user' => $user,
-        //     'token' => $token
-        // ]);
-        $response = [
-            'status' => 200,
-            'message' => 'Login validation seccess',
-            // 'credentials' => $credentials
-        ];
 
-        return response()->json($response);
+        if($request->password == Crypt::decryptString($signedup_user_info->password)){
+            $this->response = [
+                'status' => 200,
+                'message' => 'Login seccess',
+                'rights' => $signedup_user_info->rights,
+                // 'token' => $signedup_user_info->createToken('Token name')->accessToken
+            ];
+        }else{
+            throw new InvalidPasswordException;
+        }
+
+        return response()->json($this->response);
    }
 }

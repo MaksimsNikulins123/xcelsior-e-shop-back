@@ -41,6 +41,7 @@ class SignupRequest extends FormRequest
                 ->symbols()
             ],
             'user_location' => 'required',
+            'remember_me' => 'nullable'
         ];
     }
 }

@@ -27,12 +27,12 @@ class LoginRequest extends FormRequest
             'email' => [
                 'required',
                 'email',
-                // 'exists:users,email'
+                'exists:users,email'
             ],
             'password' => [
                 'required',
             ],
-            'remember_me' => 'required'
+            'remember_me' => 'nullable'
         ];
     }
 }
