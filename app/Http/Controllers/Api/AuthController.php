@@ -97,6 +97,7 @@ class AuthController extends Controller
                 'status' => 200,
                 'message' => 'Login seccess',
                 'rights' => $signedup_user_info->rights,
+                'token' => '123'
                 // 'token' => $signedup_user_info->createToken('Token name')->accessToken
             ];
         }else{
