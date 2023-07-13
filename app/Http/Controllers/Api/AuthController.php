@@ -15,7 +15,8 @@ use App\Exceptions\InvalidPasswordException;
 
 class AuthController extends Controller
 {
-    public function getMessage() {
+    public function getMessage() 
+    {
         return response()->json(
             [
                 "message" => "Hello from API it's object message",
@@ -40,17 +41,22 @@ class AuthController extends Controller
             'janis@xcelsior.lv',
             'rita@xcelsior.lv',
         ];
+
         $response = [];
+
+      
 
         if(in_array($data['email'], $admins_array ))
         {
+            
                 $user->create([
                 'rights' => 'admin',
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Crypt::encryptString($data['password']),
                 'user_location' => $data['user_location'],
-                'remember_me' => false
+                'remember_me' => false,
+                'api_token' => Str::random(60),
                 ]);
                 $this->response = [
                     'status' => 200,
@@ -65,7 +71,8 @@ class AuthController extends Controller
                 'email' => $data['email'],
                 'password' => Crypt::encryptString($data['password']),
                 'user_location' => $data['user_location'],
-                'remember_me' => false
+                'remember_me' => false,
+                'api_token' => Str::random(60),
             ]);
             $this->response = [
                 'status' => 200,
